@@ -1,5 +1,5 @@
 [package]
-name = "bitmatch"
+name = "bitpattern"
 version = "0.1.0"
 authors = ["dalance <dalance@gmail.com>"]
 repository = "https://github.com/dalance/bitmatch"

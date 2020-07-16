@@ -6,35 +6,35 @@ use quote::quote;
 /// # Example
 ///
 ///```rust
-///use bitmatch::bitmatch;
+///use bitpattern::bitpattern;
 ///
 ///let x = 0xacu8; // 10101100
 ///
 ///// '0' means the bit must be 0.
 ///// '1' means the bit must be 1.
 ///// ' ' can be uses as separator.
-///assert_eq!(bitmatch!("1010 1100", x), Some(()));
-///assert_eq!(bitmatch!("1010 0100", x), None);
+///assert_eq!(bitpattern!("1010 1100", x), Some(()));
+///assert_eq!(bitpattern!("1010 0100", x), None);
 ///
 ///// '_' means the bit can be 0 or 1.
-///assert_eq!(bitmatch!("1_10 1_00", x), Some(()));
+///assert_eq!(bitpattern!("1_10 1_00", x), Some(()));
 ///
 ///// Other charactors can be used for extracting.
 ///// 'a' extracts a single bit.
-///assert_eq!(bitmatch!("1a10 1100", x), Some(0));
-///assert_eq!(bitmatch!("10a0 1100", x), Some(1));
+///assert_eq!(bitpattern!("1a10 1100", x), Some(0));
+///assert_eq!(bitpattern!("10a0 1100", x), Some(1));
 ///
 ///// Multi-bit extracting by continuous charactors.
-///assert_eq!(bitmatch!("1aaa a100", x), Some(5));
+///assert_eq!(bitpattern!("1aaa a100", x), Some(5));
 ///
 ///// Multiple extracting.
-///assert_eq!(bitmatch!("1aa0 aa00", x), Some((1, 3)));
+///assert_eq!(bitpattern!("1aa0 aa00", x), Some((1, 3)));
 ///
 ///// If the extracting fields are adjacent, the different charactors can be used.
-///assert_eq!(bitmatch!("1aab bccc", x), Some((1, 1, 4)));
+///assert_eq!(bitpattern!("1aab bccc", x), Some((1, 1, 4)));
 ///```
 #[proc_macro]
-pub fn bitmatch(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn bitpattern(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input: TokenStream = input.into();
 
     let mut input = input.into_iter();
