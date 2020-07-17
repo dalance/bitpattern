@@ -4,6 +4,7 @@ bitwise pattern matching and extracting
 [![Actions Status](https://github.com/dalance/bitpattern/workflows/Regression/badge.svg)](https://github.com/dalance/bitpattern/actions)
 [![Crates.io](https://img.shields.io/crates/v/bitpattern.svg)](https://crates.io/crates/bitpattern)
 [![Docs.rs](https://docs.rs/bitpattern/badge.svg)](https://docs.rs/bitpattern)
+![Minimum rustc version](https://img.shields.io/badge/rustc-1.45+-lightgray.svg)
 
 ## Usage
 
