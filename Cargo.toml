@@ -19,3 +19,13 @@ proc-macro = true
 proc-macro2 = "1"
 quote = "1"
 paste = "0.1.18"
+
+[package.metadata.release]
+dev-version-ext             = "pre"
+pre-release-commit-message  = "Prepare to v{{version}}"
+post-release-commit-message = "Start next development iteration v{{version}}"
+tag-message                 = "Bump version to {{version}}"
+tag-prefix                  = ""
+pre-release-replacements    = [
+    {file = "README.md", search = "bitpattern = \"[a-z0-9\\.-]+\"", replace = "bitpattern = \"{{version}}\""},
+]
