@@ -1,4 +1,4 @@
-use proc_macro2::{Ident, TokenStream, TokenTree};
+use proc_macro2::{TokenStream, TokenTree};
 use quote::quote;
 
 /// bitwise pattern matching and extracting.
@@ -13,25 +13,25 @@ use quote::quote;
 ///// '0' means the bit must be 0.
 ///// '1' means the bit must be 1.
 ///// ' ' can be uses as separator.
-///assert_eq!(bitpattern!("1010 1100", x), Some(()));
-///assert_eq!(bitpattern!("1010 0100", x), None);
+///assert_eq!(bitpattern!("1010_1100", x), Some(()));
+///assert_eq!(bitpattern!("1010_0100", x), None);
 ///
 ///// '_' means the bit can be 0 or 1.
-///assert_eq!(bitpattern!("1_10 1_00", x), Some(()));
+///assert_eq!(bitpattern!("1?10_1?00", x), Some(()));
 ///
 ///// Other charactors can be used for extracting.
 ///// 'a' extracts a single bit.
-///assert_eq!(bitpattern!("1a10 1100", x), Some(0));
-///assert_eq!(bitpattern!("10a0 1100", x), Some(1));
+///assert_eq!(bitpattern!("1a10_1100", x), Some(0));
+///assert_eq!(bitpattern!("10a0_1100", x), Some(1));
 ///
 ///// Multi-bit extracting by continuous charactors.
-///assert_eq!(bitpattern!("1aaa a100", x), Some(5));
+///assert_eq!(bitpattern!("1aaa_a100", x), Some(5));
 ///
 ///// Multiple extracting.
-///assert_eq!(bitpattern!("1aa0 aa00", x), Some((1, 3)));
+///assert_eq!(bitpattern!("1aa0_aa00", x), Some((1, 3)));
 ///
 ///// If the extracting fields are adjacent, the different charactors can be used.
-///assert_eq!(bitpattern!("1aab bccc", x), Some((1, 1, 4)));
+///assert_eq!(bitpattern!("1aab_bccc", x), Some((1, 1, 4)));
 ///```
 #[proc_macro]
 pub fn bitpattern(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -40,11 +40,7 @@ pub fn bitpattern(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let mut input = input.into_iter();
     let pattern = input.next().expect("too less arguments");
     let comma = input.next().expect("too less arguments");
-    let ident = input.next().expect("too less arguments");
-
-    if let Some(_) = input.next() {
-        panic!("too much arguments");
-    }
+    let expr: TokenStream = input.collect();
 
     let pattern = match pattern {
         TokenTree::Literal(x) => x.to_string(),
@@ -53,7 +49,7 @@ pub fn bitpattern(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         }
     };
     let pattern = if pattern.starts_with('\"') & pattern.ends_with('\"') {
-        String::from(&pattern[1..pattern.len() - 1]).replace(" ", "")
+        String::from(&pattern[1..pattern.len() - 1]).replace("_", "")
     } else {
         panic!("1st argument must be string literal");
     };
@@ -61,27 +57,20 @@ pub fn bitpattern(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     match comma {
         TokenTree::Punct(x) => {
             if x.as_char() != ',' {
-                panic!("2nd argument must be ','");
+                panic!("',' is required");
             }
         }
         _ => {
-            panic!("2nd argument must be ','");
+            panic!("',' is required");
         }
     }
 
-    let ident = match &ident {
-        TokenTree::Ident(x) => x,
-        _ => {
-            panic!("3rd argument must be identifier");
-        }
-    };
-
     match pattern.len() {
-        1..=8 => gen_code_u8(pattern, ident),
-        9..=16 => gen_code_u16(pattern, ident),
-        17..=32 => gen_code_u32(pattern, ident),
-        33..=64 => gen_code_u64(pattern, ident),
-        65..=128 => gen_code_u128(pattern, ident),
+        1..=8 => gen_code_u8(pattern, expr),
+        9..=16 => gen_code_u16(pattern, expr),
+        17..=32 => gen_code_u32(pattern, expr),
+        33..=64 => gen_code_u64(pattern, expr),
+        65..=128 => gen_code_u128(pattern, expr),
         _ => {
             panic!("unsupported pattern length: {}", pattern.len());
         }
@@ -91,7 +80,7 @@ pub fn bitpattern(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 macro_rules! gen_code {
     ($x:ty) => {
         paste::item! {
-            fn [<gen_code_$x>](pattern: String, ident: &Ident) -> proc_macro::TokenStream {
+            fn [<gen_code_$x>](pattern: String, expr: TokenStream) -> proc_macro::TokenStream {
                 let mut bit_mask: $x = 0;
                 let mut bit_pattern: $x = 0;
 
@@ -123,7 +112,7 @@ macro_rules! gen_code {
                         }
                     }
                     if let Some(x) = prev {
-                        if x != bit && x != '0' && x != '1' && x != '_' {
+                        if x != bit && x != '0' && x != '1' && x != '?' {
                             let pos = (pattern.len() - i) as $x;
                             let mut mask: $x = 0;
                             for _ in 0..count {
@@ -142,7 +131,7 @@ macro_rules! gen_code {
                     prev = Some(bit);
                 }
                 if let Some(x) = prev {
-                    if x != '0' && x != '1' && x != '_' {
+                    if x != '0' && x != '1' && x != '?' {
                         let pos = 0 as $x;
                         let mut mask: $x = 0;
                         for _ in 0..count {
@@ -156,10 +145,11 @@ macro_rules! gen_code {
 
                 let gen = quote! {
                     {
-                        if #ident as $x & #bit_mask == #bit_pattern {
+                        let value = (#expr) as $x;
+                        if value & #bit_mask == #bit_pattern {
                             Some((
                                     #(
-                                        (#ident as $x >> #args_pos) & #args_mask
+                                        (value >> #args_pos) & #args_mask
                                     ),*
                                 ))
                         } else {
