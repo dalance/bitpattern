@@ -12,11 +12,11 @@ use quote::quote;
 ///
 ///// '0' means the bit must be 0.
 ///// '1' means the bit must be 1.
-///// ' ' can be uses as separator.
+///// '_' can be uses as separator.
 ///assert_eq!(bitpattern!("1010_1100", x), Some(()));
 ///assert_eq!(bitpattern!("1010_0100", x), None);
 ///
-///// '_' means the bit can be 0 or 1.
+///// '?' means the bit can be 0 or 1.
 ///assert_eq!(bitpattern!("1?10_1?00", x), Some(()));
 ///
 ///// Other charactors can be used for extracting.
