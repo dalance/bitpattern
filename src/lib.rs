@@ -6,32 +6,32 @@ use quote::quote;
 /// # Example
 ///
 ///```rust
-///use bitpattern::bitpattern;
+/// use bitpattern::bitpattern;
 ///
-///let x = 0xacu8; // 10101100
+/// let x = 0xacu8; // 10101100
 ///
-///// '0' means the bit must be 0.
-///// '1' means the bit must be 1.
-///// '_' can be uses as separator.
-///assert_eq!(bitpattern!("1010_1100", x), Some(()));
-///assert_eq!(bitpattern!("1010_0100", x), None);
+/// // '0' means the bit must be 0.
+/// // '1' means the bit must be 1.
+/// // '_' can be uses as separator.
+/// assert_eq!(bitpattern!("1010_1100", x), Some(()));
+/// assert_eq!(bitpattern!("1010_0100", x), None);
 ///
-///// '?' means the bit can be 0 or 1.
-///assert_eq!(bitpattern!("1?10_1?00", x), Some(()));
+/// // '?' means the bit can be 0 or 1.
+/// assert_eq!(bitpattern!("1?10_1?00", x), Some(()));
 ///
-///// Other charactors can be used for extracting.
-///// 'a' extracts a single bit.
-///assert_eq!(bitpattern!("1a10_1100", x), Some(0));
-///assert_eq!(bitpattern!("10a0_1100", x), Some(1));
+/// // Other charactors can be used for extracting.
+/// // 'a' extracts a single bit.
+/// assert_eq!(bitpattern!("1a10_1100", x), Some(0));
+/// assert_eq!(bitpattern!("10a0_1100", x), Some(1));
 ///
-///// Multi-bit extracting by continuous charactors.
-///assert_eq!(bitpattern!("1aaa_a100", x), Some(5));
+/// // Multi-bit extracting by continuous charactors.
+/// assert_eq!(bitpattern!("1aaa_a100", x), Some(5));
 ///
-///// Multiple extracting.
-///assert_eq!(bitpattern!("1aa0_aa00", x), Some((1, 3)));
+/// // Multiple extracting.
+/// assert_eq!(bitpattern!("1aa0_aa00", x), Some((1, 3)));
 ///
-///// If the extracting fields are adjacent, the different charactors can be used.
-///assert_eq!(bitpattern!("1aab_bccc", x), Some((1, 1, 4)));
+/// // If the extracting fields are adjacent, the different charactors can be used.
+/// assert_eq!(bitpattern!("1aab_bccc", x), Some((1, 1, 4)));
 ///```
 #[proc_macro]
 pub fn bitpattern(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
